@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block head %}
+<title>Listado de Proyectos</title>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<link rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+{% endblock %}
+
+{% block content %}
+
+<br><br><br>
+
+<center>
+  <font color="#686868" size="6" face="Comic Sans MS,Arial,Verdana">
+    LISTADO DE PROYECTOS
+  </font>
+</center>
+
+<br><br>
+
+<font size="3">
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th bgcolor="#F5DA81">ID</th>
+            <th bgcolor="#F5DA81">TÍTULO</th>
+            <th bgcolor="#F5DA81">FECHA</th>
+            <th bgcolor="#F5DA81">TECNOLOGÍAS</th>
+            <th bgcolor="#F5DA81">PRECIO (€)</th>
+            <th colspan="3" bgcolor="#AAF5AA" style="text-align:center;">OPERACIONES</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for p in lista_proyectos %}
+        <tr>
+            <td>{{ p.id }}</td>
+            <td>{{ p.titulo|upper }}</td>
+            <td>{{ p.fecha|date:"d/m/Y" }}</td>
+            <td>{{ p.tecnologias }}</td>
+            <td>{{ p.precio }}</td>
+
+            <!-- Botones -->
+            <form method="post">
+                {% csrf_token %}
+				<td><a class="btn btn-primary btn-sm" href="">VER</a></td>
+                <td><a class="btn btn-success btn-sm" href="">EDITAR</a></td>
+                <td><a class="btn btn-danger btn-sm"  href="">BORRAR</a></td>
+            </form>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</font>
+{% endblock content %}
+

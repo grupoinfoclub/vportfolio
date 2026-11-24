@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block head %}
+<title>PORTFOLIO</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" integrity="sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" integrity="sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" crossorigin="anonymous">
+{% endblock %}
+
+{% block content %}
+  <br><br><br><br>
+  <center>
+   <h1> ESTADISTICAS</h1>
+      <h2>📊 Dashboard</h2>
+        <div style="display:flex; gap:20px;">
+			<div>Total experiencias: <strong>{{ total_experiencias }}</strong></div>
+			<div>Total proyectos: <strong>{{ total_proyectos }}</strong></div>
+			<div>Total posts: <strong>{{ total_posts }}</strong></div>
+			<div>Proyecto más caro: <strong>{{ proyecto_mas_caro }} €</strong></div>
+			<div>Precio medio: <strong>{{ precio_medio }} €</strong></div>
+		</div>
+		
+		<!-- Gráfico 1: Proyectos por tecnología (Barras) -->
+		<canvas id="tecnologiasChart"></canvas>
+
+		<script>
+		const tecnologiasData = {
+			labels: [{% for p in proyectos_tecnologia %}'{{ p.tecnologias }}',{% endfor %}],
+			datasets: [{
+				label: 'Proyectos por tecnología',
+				data: [{% for p in proyectos_tecnologia %}{{ p.total }},{% endfor %}],
+			}]
+		};
+
+		new Chart(document.getElementById('tecnologiasChart'), {
+			type: 'bar',
+			data: tecnologiasData
+		});
+		</script>
+		
+		<canvas id="anyoChart"></canvas>
+		<script>
+		const anyoData = {
+			labels: [{% for p in proyectos_anyo %}'{{ p.fecha__year }}',{% endfor %}],
+			datasets: [{
+				label: 'Proyectos por año',
+				data: [{% for p in proyectos_anyo %}{{ p.total }},{% endfor %}],
+				tension: 0.3
+			}]
+		};
+
+		new Chart(document.getElementById('anyoChart'), {
+			type: 'line',
+			data: anyoData
+		});
+		</script>
+
+        <button onclick="exportarPDF()">📄 Exportar Dashboard a PDF</button>
+		
+		<script>
+function exportarPDF() {
+    const tecnologiasImg = document
+        .getElementById('tecnologiasChart')
+        .toDataURL('image/png');
+
+    const anyoImg = document
+        .getElementById('anyoChart')
+        .toDataURL('image/png');
+
+    fetch("{% url 'dashboard_pdf' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            tecnologias: tecnologiasImg,
+            anyo: anyoImg
+        })
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        window.open(url);
+    });
+}
+</script>
+
+
+  </center>
+
+{% endblock content %}

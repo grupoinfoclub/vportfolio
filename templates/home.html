@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load static %}
+{% block head %}
+<title>VPORTFOLIO</title>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" integrity="sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" integrity="sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" crossorigin="anonymous">
+ {% endblock %}
+
+ {% block content %}
+
+ {# {% include "carousel.html" %} #}
+ <br><br><br><br>
+ {% if not request.user.is_authenticated %}
+ <h1>PÁGINA DE INICIO</h1>
+   <!-- ><img src="{% static 'appportfolio/bootstrap/imagenes/marta.png'%}" height='340' width='390'>-->
+    <img src="{% static 'images/chica2.jpg'%}" height='190' width='190'>
+    <img src="{% static 'images/chica3.jpg'%}" height='190' width='190'>
+    <img src="{% static 'images/chica1.jpg'%}" height='190' width='190'>
+ {% endif %}
+
+ {% if request.user.is_authenticated %}
+  <center>
+  <font color="#686868" size="5" face="Comic Sans MS,Arial,Verdana">
+  {{ nombreProyecto }}
+  </font>
+   </center>
+ {% endif %}
+
+<br><br>
+
+<form method="GET" class="form-inline" style="margin-bottom: 20px;">
+    <input type="text" name="q" class="form-control" placeholder="Buscar..."
+           value="{{ query }}">
+    <button class="btn btn-primary" type="submit">Buscar</button>
+</form>
+
+<a href="{% url 'home' %}" class="btn btn-default">Limpiar</a>
+
+{% if request.GET.q %}
+<a href="{% url 'generar_qr' %}?empresa={{ request.GET.q }}" 
+   class="btn btn-success">
+    Generar QR de "{{ request.GET.q }}"
+</a>
+{% endif %}
+
+<br><br>
+
+<font size="3">
+<table class="table table-bordered">
+	<thead>
+        <tr>
+			<th bgcolor="#F5DA81">ID</th>
+			<th bgcolor="#F5DA81">EMPRESA</th>
+			<th bgcolor="#F5DA81">FECHA</th>
+			<th colspan="4" style="text-align:center;" bgcolor="#AAF5AA">OPERACIONES</th>
+        </tr>
+		</thead>
+		<tbody>
+        {% for r in lista_experiencias %}
+				<td> {{ r.id }} </td>
+                <td> {{ r.empresa|upper|slice:"0:12" }} </td>
+                <td> {{ r.fecharecogida|date:"j/m/y" }} </td> <!--la original d-M-Y -->
+
+            <form action="" method="post">
+            {% csrf_token %}
+			<!-- ojo las url no llevan / -->
+			<td><a class='btn btn-primary btn-sm' href="{% url 'ver_experiencia' id=r.id %}">VER</a></td>
+			<td><a class='btn btn-danger btn-sm'  href="{% url 'eliminarExperiencia' pk=r.id %}">ANULAR</a></td>
+			<td><a class='btn btn-success btn-sm' href="{% url 'home' %}">EDITAR</a></td>
+            </form>
+          </tr>
+        {% endfor %}
+		 </tbody>
+    </table>
+</font>
+
+<!-- PAGINACIÓN -->
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+
+        {% if page_obj.has_previous %}
+            <li><a href="?page=1">&laquo; Primero</a></li>
+            <li><a href="?page={{ page_obj.previous_page_number }}">Anterior</a></li>
+        {% else %}
+            <li class="disabled"><span>&laquo; Primero</span></li>
+            <li class="disabled"><span>Anterior</span></li>
+        {% endif %}
+
+        <li class="active"><span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+
+        {% if page_obj.has_next %}
+            <li><a href="?page={{ page_obj.next_page_number }}">Siguiente</a></li>
+            <li><a href="?page={{ page_obj.paginator.num_pages }}">Último &raquo;</a></li>
+        {% else %}
+            <li class="disabled"><span>Siguiente</span></li>
+            <li class="disabled"><span>Último &raquo;</span></li>
+        {% endif %}
+
+    </ul>
+</nav>
+
+<!-- Panel de estadísticas -->
+<div class="panel panel-default" style="margin-top: 20px;">
+    <div class="panel-heading">
+        <h4>Resumen</h4>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="well text-center">
+                    <h3>{{ total_registros }}</h3>
+                    <p>Total Experiencias</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="well text-center">
+                    <h3>{{ empresas_unicas }}</h3>
+                    <p>Empresas Únicas</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="well text-center">
+                    <h3>{{ ultimo_mes }}</h3>
+                    <p>Último mes</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="well text-center">
+                    <h3>{{ activas }}</h3>
+                    <p>Activas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
